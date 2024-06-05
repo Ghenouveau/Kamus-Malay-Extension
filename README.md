@@ -1,17 +1,14 @@
 # Quick English to Malay Translation Chrome Extension
 
-The Quick English to Malay Translation is a handy Chrome extension that provides instant English to Malay translations, ~~pronunciations~~, and meanings for words on any webpage. With a simple double-click on a word, the extension displays a popup containing the relevant information.
+The Quick English to Malay Translation is a handy Chrome extension that provides instant English to Malay translations and meanings for words on any webpage. With a simple double-click on a word, the extension displays a popup containing the relevant information.
 
 ## Features
 
-- The first one of its kind! Completely free!!
+- The first one of its kind! Over 21000+ entries!!
 - Provides an accurate English to Malay translations, pronunciations, and meanings
 - Does not rely on Google or any ML translation as its source
 - Uses author's own dictionary collections
-- Supports variations like plurals for comprehensive word coverage
-- Utilizes the Porter stemmer algorithm as a fallback for words not found in the dictionary
-- Offers a sleek and intuitive popup design with a semi-transparent background and blur effect
-- Easy to use and works seamlessly across different websites
+- Utilizes a stemming algorithm as a fallback for words not found in the dictionary
 
 ## Installation
 
