@@ -40,13 +40,15 @@ function createPopup(entry, selectedWord, shouldHighlight, x, y) {
 
   const wordElement = document.createElement('div');
   wordElement.classList.add('word');
-  wordElement.textContent = word;
+  wordElement.textContent = word.charAt(0).toUpperCase() + word.slice(1);
   popup.appendChild(wordElement);
 
   const translationElement = document.createElement('div');
   translationElement.classList.add('translation');
 
-  if (shouldHighlight && translationEntry.includes(selectedWord)) {
+  const capitalizedTranslationEntry = translationEntry.charAt(0).toUpperCase() + translationEntry.slice(1);
+
+  if (shouldHighlight && capitalizedTranslationEntry.includes(selectedWord)) {
     const parts = translationEntry.split(selectedWord);
     translationElement.innerHTML = parts.join(`<span class="highlight">${selectedWord}</span>`);
   } else {
