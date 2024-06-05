@@ -13,7 +13,7 @@ async function loadDictionary() {
   const rows = csv.trim().split('\n');
 
   for (const row of rows) {
-    const [word, translation, pronunciation, meaning] = row.split(',').map(item => item.trim());
+    const [word, translation, pronunciation, meaning] = row.split(',').map(item => item.trim().replace(/^"|"$/g, ''));
 
     if (word && translation) {
       const normalizedWord = word.toLowerCase().replace(/[^a-z]/g, '');
