@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "English to Malay Kamus Translation",
+  "version": "1.0",
+  "description": "Shows a translation popup on double-clicking a word",
+  "permissions": ["activeTab"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["porter-stemmer.js", "content.js"],
+      "css": ["popup.css"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["dictionary.csv"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
