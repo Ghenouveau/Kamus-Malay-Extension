@@ -28,7 +28,7 @@
 .meaning {
   margin-bottom: 6px;
 }
-
-.stemmed-part {
-  color: red;
+.highlight {
+  color: darkred;
+  font-weight: bold;
 }

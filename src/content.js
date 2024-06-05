@@ -1,9 +1,5 @@
 // content.js
 
-/**
- * Loads the dictionary from the dictionary.csv file.
- * @returns {Promise<Object>} A Promise that resolves with the dictionary object.
- */
 async function loadDictionary() {
   const dictionaryUrl = chrome.runtime.getURL('dictionary.csv');
   const response = await fetch(dictionaryUrl);
@@ -13,9 +9,10 @@ async function loadDictionary() {
   const rows = csv.trim().split('\n');
 
   for (const row of rows) {
-    const [word, translation, pronunciation, meaning] = row.split(',').map(item => item.trim().replace(/^"|"$/g, ''));
+    const [word, ...translationParts] = row.split(',').map(item => item.trim());
+    const translationEntry = translationParts.join(',').replace(/^"|"$/g, '');
 
-    if (word && translation) {
+    if (word && translationEntry) {
       const normalizedWord = word.toLowerCase().replace(/[^a-z]/g, '');
       const variations = [
         normalizedWord, // Normalized word
@@ -27,7 +24,7 @@ async function loadDictionary() {
           dictionary[variation] = [];
         }
 
-        dictionary[variation].push({ translation, pronunciation, meaning });
+        dictionary[variation].push({ word, translationEntry });
       }
     }
   }
@@ -35,14 +32,9 @@ async function loadDictionary() {
   return dictionary;
 }
 
-/**
- * Creates a translation popup at the specified coordinates.
- * @param {Array} entries The dictionary entries for the selected word.
- * @param {string} word The selected English word.
- * @param {number} x The x-coordinate of the popup position.
- * @param {number} y The y-coordinate of the popup position.
- */
-function createPopup(entries, word, stemmedPart, x, y) {
+function createPopup(entry, selectedWord, shouldHighlight, x, y) {
+  const { word, translationEntry } = entry;
+
   const popup = document.createElement('div');
   popup.className = 'translation-popup';
 
@@ -51,28 +43,17 @@ function createPopup(entries, word, stemmedPart, x, y) {
   wordElement.textContent = word;
   popup.appendChild(wordElement);
 
-  for (const entry of entries) {
-    const entryElement = document.createElement('div');
-    entryElement.classList.add('entry');
+  const translationElement = document.createElement('div');
+  translationElement.classList.add('translation');
 
-    const translationElement = document.createElement('div');
-    translationElement.classList.add('translation');
-    translationElement.textContent = entry.translation;
-
-    const pronunciationElement = document.createElement('div');
-    pronunciationElement.classList.add('pronunciation');
-    pronunciationElement.textContent = entry.pronunciation || '';
-
-    const meaningElement = document.createElement('div');
-    meaningElement.classList.add('meaning');
-    meaningElement.textContent = entry.meaning || '';
-
-    entryElement.appendChild(translationElement);
-    entryElement.appendChild(pronunciationElement);
-    entryElement.appendChild(meaningElement);
-
-    popup.appendChild(entryElement);
+  if (shouldHighlight && translationEntry.includes(selectedWord)) {
+    const parts = translationEntry.split(selectedWord);
+    translationElement.innerHTML = parts.join(`<span class="highlight">${selectedWord}</span>`);
+  } else {
+    translationElement.textContent = translationEntry;
   }
+
+  popup.appendChild(translationElement);
 
   document.body.appendChild(popup);
 
@@ -104,18 +85,27 @@ loadDictionary()
       const selection = window.getSelection();
       const selectedText = selection.toString().trim().toLowerCase().replace(/[^a-z]/g, '');
 
+      // First try: Look for the word in column1
       if (dictionary.hasOwnProperty(selectedText)) {
         const entries = dictionary[selectedText];
-        const word = selection.toString().trim();
-        createPopup(entries, word, null, event.pageX, event.pageY);
+        const selectedWord = selection.toString().trim();
+        createPopup(entries[0], selectedWord, false, event.pageX, event.pageY);
       } else {
-        // Use Porter stemmer as a fallback
+        // Second try: Use stemming and look in column1
         const stemmedWord = stemmer(selectedText);
         if (dictionary.hasOwnProperty(stemmedWord)) {
           const entries = dictionary[stemmedWord];
-          const word = selection.toString().trim();
-          const stemmedPart = selectedText.slice(stemmedWord.length);
-          createPopup(entries, word, stemmedPart, event.pageX, event.pageY);
+          const selectedWord = selection.toString().trim();
+          createPopup(entries[0], selectedWord, false, event.pageX, event.pageY);
+        } else {
+          // Third try: Look for the word in column2
+          const column2Entries = Object.values(dictionary).flat();
+          const matchingEntry = column2Entries.find(entry => entry.translationEntry.includes(selectedText));
+
+          if (matchingEntry) {
+            const selectedWord = selection.toString().trim();
+            createPopup(matchingEntry, selectedWord, true, event.pageX, event.pageY);
+          }
         }
       }
     });
