@@ -79,6 +79,19 @@ function createPopup(entry, selectedWord, shouldHighlight, x, y) {
   document.addEventListener('click', () => popup.remove());
 }
 
+function correctStemmedWord(stemmedWord, dictionary) {
+  const vowels = ['a', 'e', 'i', 'o', 'u'];
+  
+  for (const vowel of vowels) {
+    const correctedWord = stemmedWord + vowel;
+    if (dictionary.hasOwnProperty(correctedWord)) {
+      return correctedWord;
+    }
+  }
+  
+  return null;
+}
+
 loadDictionary()
   .then(dictionary => {
     document.addEventListener('dblclick', event => {
@@ -105,6 +118,14 @@ loadDictionary()
           if (matchingEntry) {
             const selectedWord = selection.toString().trim();
             createPopup(matchingEntry, selectedWord, true, event.pageX, event.pageY);
+          } else {
+            // Fourth try: Correct the stemmed word and look in column1
+            const correctedWord = correctStemmedWord(stemmedWord, dictionary);
+            if (correctedWord) {
+              const entries = dictionary[correctedWord];
+              const selectedWord = selection.toString().trim();
+              createPopup(entries[0], selectedWord, false, event.pageX, event.pageY);
+            }
           }
         }
       }
