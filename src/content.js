@@ -52,7 +52,7 @@ function createPopup(entry, selectedWord, shouldHighlight, x, y) {
     const lowercaseTranslationEntry = capitalizedTranslationEntry.toLowerCase();
     const lowercaseSelectedWord = selectedWord.toLowerCase();
     const parts = lowercaseTranslationEntry.split(lowercaseSelectedWord);
-    translationElement.innerHTML = parts.join(`<span class="highlight">${selectedWord}</span>`);
+    translationElement.innerHTML = parts.join(`<br><br><span class="highlight">${lowercaseSelectedWord}</span>`);
   } else {
     translationElement.textContent = capitalizedTranslationEntry;
   }
