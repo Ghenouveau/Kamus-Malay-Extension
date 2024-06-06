@@ -167,42 +167,44 @@ loadDictionary()
   .then(dictionary => {
     document.addEventListener('dblclick', event => {
       const selection = window.getSelection();
-      const selectedText = selection.toString().trim().toLowerCase().replace(/[^a-z]/g, '');
+      const selectedText = selection.toString().trim();
+
+      if (selectedText.split(' ').length > 1) {
+        return;
+      }
+
+      const normalizedText = selectedText.toLowerCase().replace(/[^a-z]/g, '');
 
       // First try: Look for the word in column1
-      if (dictionary.hasOwnProperty(selectedText)) {
-        const entries = dictionary[selectedText];
-        const selectedWord = selection.toString().trim();
-        createPopup(entries, selectedWord, false, event.pageX, event.pageY);
+      if (dictionary.hasOwnProperty(normalizedText)) {
+        const entries = dictionary[normalizedText];
+        createPopup(entries, selectedText, false, event.pageX, event.pageY);
       } else {
         // Second try: Use stemming and look in column1
-        const stemmedWord = stemmer(selectedText);
+        const stemmedWord = stemmer(normalizedText);
         if (dictionary.hasOwnProperty(stemmedWord)) {
           const entries = dictionary[stemmedWord];
-          const selectedWord = selection.toString().trim();
-          createPopup(entries, selectedWord, false, event.pageX, event.pageY);
+          createPopup(entries, selectedText, false, event.pageX, event.pageY);
         } else {
           // Third try: Look for the word in column2
           const column2Entries = Object.values(dictionary).flat();
-          const matchingEntry = column2Entries.find(entry => entry.translationEntry.includes(selectedText));
+          const matchingEntry = column2Entries.find(entry => entry.translationEntry.toLowerCase().includes(normalizedText));
 
           if (matchingEntry) {
-            const selectedWord = selection.toString().trim();
-            createPopup([matchingEntry], selectedWord, true, event.pageX, event.pageY);
+            createPopup([matchingEntry], selectedText, true, event.pageX, event.pageY);
           } else {
             // Fourth try: Correct the stemmed word and look in column1
             const correctedWord = correctStemmedWord(stemmedWord, dictionary);
             if (correctedWord) {
               const entries = dictionary[correctedWord];
-              const selectedWord = selection.toString().trim();
-              createPopup(entries, selectedWord, false, event.pageX, event.pageY);
+              createPopup(entries, selectedText, false, event.pageX, event.pageY);
             } else {
               // Fifth try: Look for a combination of partial word matches
               const words = Object.keys(dictionary).sort((a, b) => b.length - a.length);
               const matchedWords = [];
-              let remainingText = selectedText;
+              let remainingText = normalizedText;
 
-              while (remainingText.length > 0) {
+              while (remainingText.length > 0 && matchedWords.length < 3) {
                 let matchFound = false;
 
                 for (const word of words) {
@@ -221,9 +223,8 @@ loadDictionary()
                 }
               }
 
-              if (matchedWords.length > 1) {
-                const selectedWord = selection.toString().trim();
-                createCombinationPopup(matchedWords, dictionary, selectedWord, event.pageX, event.pageY);
+              if (matchedWords.length > 1 && matchedWords.length <= 3) {
+                createCombinationPopup(matchedWords, dictionary, selectedText, event.pageX, event.pageY);
               }
             }
           }
