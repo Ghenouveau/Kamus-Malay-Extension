@@ -1,4 +1,10 @@
-# Quick English to Malay Translation Chrome Extension
+<p align="center">
+  <img src="static/logo.png" alt="Kamus Dwibahasa BI-BM Logo" width="230">
+  <br>
+  Kamus Dwibahasa BI-BM
+</p>
+
+# Quick English to Malay Translation
 
 The Quick English to Malay Translation is a handy Chrome extension that provides instant English to Malay translations and meanings for words on any webpage. With a simple double-click on a word, the extension displays a popup containing the relevant information.
 
