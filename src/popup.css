@@ -1,34 +1,35 @@
 /* popup.css */
-.translation-popup {
-  position: absolute;
-  background: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
-  backdrop-filter: blur(10px); /* Apply blur effect */
-  border: 1px solid rgba(0, 0, 0, 0.1); /* Semi-transparent black border */
-  border-radius: 8px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); /* Soft shadow */
-  padding: 16px;
-  font-size: 14px;
-  max-width: 300px;
-  line-height: 1.4;
-  color: #333; /* Dark text color */
-  z-index: 1000;
-  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+.kamus-translation-popup {
+  position: absolute !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  padding: 16px !important;
+  font-size: 14px !important;
+  max-width: 300px !important;
+  line-height: 1.4 !important;
+  color: #333 !important;
+  z-index: 1000 !important;
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s !important;
 }
 
-.word {
-  font-weight: bold;
-  font-size: 16px;
-  margin-bottom: 8px;
+.kamus-translation-popup .word {
+  font-weight: bold !important;
+  font-size: 16px !important;
+  margin-bottom: 8px !important;
 }
 
-.translation {
-  margin-bottom: 12px;
+.kamus-translation-popup .translation {
+  margin-bottom: 12px !important;
 }
 
-.meaning {
-  margin-bottom: 6px;
+.kamus-translation-popup .meaning {
+  margin-bottom: 6px !important;
 }
-.highlight {
-  color: darkred;
-  font-weight: bold;
+
+.kamus-translation-popup .highlight {
+  color: darkred !important;
+  font-weight: bold !important;
 }

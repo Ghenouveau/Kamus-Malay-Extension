@@ -36,7 +36,7 @@ function createPopup(entry, selectedWord, shouldHighlight, x, y) {
   const { word, translationEntry } = entry;
 
   const popup = document.createElement('div');
-  popup.className = 'translation-popup';
+  popup.className = 'kamus-translation-popup';
 
   const wordElement = document.createElement('div');
   wordElement.classList.add('word');
