@@ -51,7 +51,7 @@ function createPopup(entries, selectedWord, shouldHighlight, x, y) {
       const lowercaseTranslationEntry = capitalizedTranslationEntry.toLowerCase();
       const lowercaseSelectedWord = selectedWord.toLowerCase();
       const parts = lowercaseTranslationEntry.split(lowercaseSelectedWord);
-      return parts.join(`<span class="highlight">${lowercaseSelectedWord}</span>`);
+      return parts.join(`<br><br><span class="highlight">${lowercaseSelectedWord}</span>`);
     } else {
       return capitalizedTranslationEntry;
     }
@@ -84,16 +84,82 @@ function createPopup(entries, selectedWord, shouldHighlight, x, y) {
   document.addEventListener('click', () => popup.remove());
 }
 
+function createCombinationPopup(matchedWords, dictionary, selectedWord, x, y) {
+  const popup = document.createElement('div');
+  popup.className = 'kamus-translation-popup';
+
+  const wordElement = document.createElement('div');
+  wordElement.classList.add('word');
+
+  const formattedWordParts = matchedWords.map(word => {
+    const stemmedWord = word.endsWith('s') ? word.slice(0, -1) : word;
+    const partialWord = selectedWord.substr(selectedWord.toLowerCase().indexOf(stemmedWord), stemmedWord.length);
+    return partialWord.charAt(0).toUpperCase() + partialWord.slice(1);
+  });
+
+  wordElement.textContent = formattedWordParts.join(' + ');
+  popup.appendChild(wordElement);
+
+  matchedWords.forEach((word, index) => {
+    const entries = dictionary[word];
+
+    const wordTitleElement = document.createElement('div');
+    wordTitleElement.classList.add('word-title');
+    wordTitleElement.textContent = formattedWordParts[index];
+    popup.appendChild(wordTitleElement);
+
+    const translationElement = document.createElement('div');
+    translationElement.classList.add('translation');
+
+    const meanings = entries.map(entry => {
+      const capitalizedTranslationEntry = entry.translationEntry.charAt(0).toUpperCase() + entry.translationEntry.slice(1);
+      return capitalizedTranslationEntry;
+    });
+
+    translationElement.innerHTML = meanings.join('<br><br>');
+    popup.appendChild(translationElement);
+
+    if (index < matchedWords.length - 1) {
+      const separator = document.createElement('div');
+      separator.classList.add('separator');
+      popup.appendChild(separator);
+    }
+  });
+
+  document.body.appendChild(popup);
+
+  const popupRect = popup.getBoundingClientRect();
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+
+  // Adjust x-coordinate if popup exceeds viewport width
+  if (x + popupRect.width > viewportWidth) {
+    x = viewportWidth - popupRect.width;
+  }
+
+  // Adjust y-coordinate if popup exceeds viewport height
+  if (y - popupRect.height < 0) {
+    y = popupRect.height;
+  }
+
+  popup.style.left = `${x}px`;
+  popup.style.top = `${y - popupRect.height}px`;
+  popup.style.zIndex = '999999';
+
+  popup.addEventListener('click', (event) => event.stopPropagation());
+  document.addEventListener('click', () => popup.remove());
+}
+
 function correctStemmedWord(stemmedWord, dictionary) {
   const vowels = ['a', 'e', 'i', 'o', 'u'];
-  
+
   for (const vowel of vowels) {
     const correctedWord = stemmedWord + vowel;
     if (dictionary.hasOwnProperty(correctedWord)) {
       return correctedWord;
     }
   }
-  
+
   return null;
 }
 
@@ -122,7 +188,7 @@ loadDictionary()
 
           if (matchingEntry) {
             const selectedWord = selection.toString().trim();
-            createPopup(matchingEntry, selectedWord, true, event.pageX, event.pageY);
+            createPopup([matchingEntry], selectedWord, true, event.pageX, event.pageY);
           } else {
             // Fourth try: Correct the stemmed word and look in column1
             const correctedWord = correctStemmedWord(stemmedWord, dictionary);
@@ -130,6 +196,35 @@ loadDictionary()
               const entries = dictionary[correctedWord];
               const selectedWord = selection.toString().trim();
               createPopup(entries, selectedWord, false, event.pageX, event.pageY);
+            } else {
+              // Fifth try: Look for a combination of partial word matches
+              const words = Object.keys(dictionary).sort((a, b) => b.length - a.length);
+              const matchedWords = [];
+              let remainingText = selectedText;
+
+              while (remainingText.length > 0) {
+                let matchFound = false;
+
+                for (const word of words) {
+                  const stemmedWord = word.endsWith('s') ? word.slice(0, -1) : word;
+
+                  if (remainingText.startsWith(stemmedWord)) {
+                    matchedWords.push(word);
+                    remainingText = remainingText.slice(stemmedWord.length);
+                    matchFound = true;
+                    break;
+                  }
+                }
+
+                if (!matchFound) {
+                  break;
+                }
+              }
+
+              if (matchedWords.length > 1) {
+                const selectedWord = selection.toString().trim();
+                createCombinationPopup(matchedWords, dictionary, selectedWord, event.pageX, event.pageY);
+              }
             }
           }
         }
