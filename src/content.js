@@ -32,31 +32,32 @@ async function loadDictionary() {
   return dictionary;
 }
 
-function createPopup(entry, selectedWord, shouldHighlight, x, y) {
-  const { word, translationEntry } = entry;
-
+function createPopup(entries, selectedWord, shouldHighlight, x, y) {
   const popup = document.createElement('div');
   popup.className = 'kamus-translation-popup';
 
   const wordElement = document.createElement('div');
   wordElement.classList.add('word');
-  wordElement.textContent = word.charAt(0).toUpperCase() + word.slice(1);
+  wordElement.textContent = entries[0].word.charAt(0).toUpperCase() + entries[0].word.slice(1);
   popup.appendChild(wordElement);
 
   const translationElement = document.createElement('div');
   translationElement.classList.add('translation');
 
-  const capitalizedTranslationEntry = translationEntry.charAt(0).toUpperCase() + translationEntry.slice(1);
+  const meanings = entries.map(entry => {
+    const capitalizedTranslationEntry = entry.translationEntry.charAt(0).toUpperCase() + entry.translationEntry.slice(1);
 
-  if (shouldHighlight) {
-    const lowercaseTranslationEntry = capitalizedTranslationEntry.toLowerCase();
-    const lowercaseSelectedWord = selectedWord.toLowerCase();
-    const parts = lowercaseTranslationEntry.split(lowercaseSelectedWord);
-    translationElement.innerHTML = parts.join(`<br><br><span class="highlight">${lowercaseSelectedWord}</span>`);
-  } else {
-    translationElement.textContent = capitalizedTranslationEntry;
-  }
+    if (shouldHighlight) {
+      const lowercaseTranslationEntry = capitalizedTranslationEntry.toLowerCase();
+      const lowercaseSelectedWord = selectedWord.toLowerCase();
+      const parts = lowercaseTranslationEntry.split(lowercaseSelectedWord);
+      return parts.join(`<span class="highlight">${lowercaseSelectedWord}</span>`);
+    } else {
+      return capitalizedTranslationEntry;
+    }
+  });
 
+  translationElement.innerHTML = meanings.join('<br><br>');
   popup.appendChild(translationElement);
 
   document.body.appendChild(popup);
@@ -106,14 +107,14 @@ loadDictionary()
       if (dictionary.hasOwnProperty(selectedText)) {
         const entries = dictionary[selectedText];
         const selectedWord = selection.toString().trim();
-        createPopup(entries[0], selectedWord, false, event.pageX, event.pageY);
+        createPopup(entries, selectedWord, false, event.pageX, event.pageY);
       } else {
         // Second try: Use stemming and look in column1
         const stemmedWord = stemmer(selectedText);
         if (dictionary.hasOwnProperty(stemmedWord)) {
           const entries = dictionary[stemmedWord];
           const selectedWord = selection.toString().trim();
-          createPopup(entries[0], selectedWord, false, event.pageX, event.pageY);
+          createPopup(entries, selectedWord, false, event.pageX, event.pageY);
         } else {
           // Third try: Look for the word in column2
           const column2Entries = Object.values(dictionary).flat();
@@ -128,7 +129,7 @@ loadDictionary()
             if (correctedWord) {
               const entries = dictionary[correctedWord];
               const selectedWord = selection.toString().trim();
-              createPopup(entries[0], selectedWord, false, event.pageX, event.pageY);
+              createPopup(entries, selectedWord, false, event.pageX, event.pageY);
             }
           }
         }
