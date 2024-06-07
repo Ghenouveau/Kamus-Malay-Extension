@@ -173,6 +173,10 @@ loadDictionary()
         return;
       }
 
+      if (!/^[a-zA-Z]+$/.test(selectedText)) {
+        return;
+      }
+
       const normalizedText = selectedText.toLowerCase().replace(/[^a-z]/g, '');
 
       // First try: Look for the word in column1
