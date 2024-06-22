@@ -33,7 +33,3 @@ The Quick English to Malay Translation is a handy Chrome extension that provides
 ## Contributing
 
 Contributions are welcome! If you have any ideas, suggestions, or bug reports, please open an issue or submit a pull request.
-
-## License
-
-This project is licensed under the MIT License.
