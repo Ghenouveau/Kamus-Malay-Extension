@@ -1,19 +1,37 @@
 // content.js
 
 let dictionary = {};
+let dictionaryList = [];
 
-async function loadDictionary() {
-  return new Promise((resolve) => {
-    chrome.storage.local.get('dictionary', function(result) {
-      if (result.dictionary && Object.keys(result.dictionary).length > 0) {
-        dictionary = result.dictionary;
-        console.log('Dictionary loaded:', Object.keys(dictionary).length, 'entries');
-        resolve();
-      } else {
-        console.log('No dictionary found, waiting for background script to initialize');
-        resolve();
-      }
-    });
+function getVisibleText() {
+  return document.body.innerText;
+}
+
+function searchKeywords(text, keywords) {
+  const lowerText = text.toLowerCase();
+  return keywords.some(keyword => lowerText.includes(keyword.toLowerCase()));
+}
+
+function updateActiveDictionaries() {
+  const visibleText = getVisibleText();
+  const activeDictionaries = dictionaryList.filter(dict => 
+    dict.enabled && (!dict.keywords || dict.keywords.length === 0 || searchKeywords(visibleText, dict.keywords))
+  ).map(dict => dict.name);
+
+  chrome.runtime.sendMessage({
+    action: "getFilteredDictionary",
+    activeDictionaries: activeDictionaries
+  }, response => {
+    dictionary = response.filteredDictionary;
+    console.log('Active dictionaries:', activeDictionaries);
+    console.log('Dictionary updated:', Object.keys(dictionary).length, 'entries');
+  });
+}
+
+function loadDictionaryList() {
+  chrome.storage.local.get('dictionaryList', result => {
+    dictionaryList = result.dictionaryList || [];
+    updateActiveDictionaries();
   });
 }
 
@@ -266,12 +284,6 @@ function findPartialMatches(normalizedText) {
   return [];
 }
 
-
-loadDictionary().then(() => {
-  console.log('Dictionary loaded, adding event listener');
-  document.addEventListener('dblclick', handleDoubleClick);
-});
-
 function handleDoubleClick(event) {
   const selection = window.getSelection();
   const selectedText = selection.toString().trim();
@@ -299,10 +311,20 @@ function handleDoubleClick(event) {
     console.log('No matches found');
   }
 }
+// Initialize
+loadDictionaryList();
+document.addEventListener('dblclick', handleDoubleClick);
 
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+// Update dictionaries when page content changes
+const observer = new MutationObserver(() => {
+  updateActiveDictionaries();
+});
+observer.observe(document.body, { childList: true, subtree: true });
+
+// Listen for dictionary updates from popup
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "dictionaryUpdated") {
-    console.log('Dictionary update received, reloading');
-    loadDictionary();
+    console.log('Dictionary list updated, reloading');
+    loadDictionaryList();
   }
 });

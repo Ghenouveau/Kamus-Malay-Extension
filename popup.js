@@ -36,9 +36,16 @@ document.addEventListener('DOMContentLoaded', function() {
               <button class="toggle-dict" data-name="${dict.name}">${dict.enabled ? 'Disable' : 'Enable'}</button>
               <button class="remove-dict" data-name="${dict.name}">Remove</button>
             </div>
+            <input type="text" class="keywords-input" data-name="${dict.name}" placeholder="Enter keywords (comma-separated)" value="${dict.keywords || ''}">
           `;
           dictionaryListDiv.appendChild(dictDiv);
         });
+        // After updating the dictionary list, notify all tabs
+      chrome.tabs.query({}, function(tabs) {
+        tabs.forEach(tab => {
+          chrome.tabs.sendMessage(tab.id, {action: "dictionaryUpdated"});
+        });
+      });
   
         // Add event listeners for toggle and remove buttons
         document.querySelectorAll('.toggle-dict').forEach(btn => {
@@ -57,6 +64,17 @@ document.addEventListener('DOMContentLoaded', function() {
             chrome.runtime.sendMessage({action: "removeDictionary", name: dictName}, function(response) {
               statusDiv.textContent = response.message;
               updateDictionaryList();
+            });
+          });
+        });
+  
+        // Add event listeners for keywords input
+        document.querySelectorAll('.keywords-input').forEach(input => {
+          input.addEventListener('change', function() {
+            const dictName = this.getAttribute('data-name');
+            const keywords = this.value.split(',').map(k => k.trim()).filter(k => k);
+            chrome.runtime.sendMessage({action: "updateKeywords", name: dictName, keywords: keywords}, function(response) {
+              statusDiv.textContent = response.message;
             });
           });
         });

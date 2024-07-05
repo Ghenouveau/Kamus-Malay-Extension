@@ -26,7 +26,16 @@ function mergeDictionaries(existing, newEntries) {
   }
   
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    if (request.action === "loadDictionary") {
+    if (request.action === "getFilteredDictionary") {
+        chrome.storage.local.get('dictionaries', result => {
+          const dictionaries = result.dictionaries || {};
+          const mergedDictionary = Object.values(dictionaries).reduce(mergeDictionaries, {});
+          const filteredDictionary = filterDictionary(mergedDictionary, request.activeDictionaries);
+          sendResponse({ filteredDictionary: filteredDictionary });
+        });
+        return true; // Indicates that the response will be sent asynchronously
+      }
+    else if (request.action === "loadDictionary") {
       const csvContent = request.data;
       const dictionaryName = request.name;
       const rows = csvContent.trim().split('\n');
