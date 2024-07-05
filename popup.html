@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Kamus Dictionary Management</title>
+  <style>
+    body { width: 350px; padding: 10px; font-family: Arial, sans-serif; }
+    button { margin-top: 10px; }
+    #dictionaryList { margin-top: 20px; }
+    .dictionary-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .dictionary-item button { margin-top: 0; margin-left: 5px; }
+  </style>
+</head>
+<body>
+  <h2>Kamus Dictionary Management</h2>
+  <input type="file" id="csvFile" accept=".csv">
+  <button id="loadDictionary">Load Dictionary</button>
+  <div id="status"></div>
+
+  <div id="dictionaryList">
+    <h3>Loaded Dictionaries</h3>
+    <!-- Dictionary items will be dynamically added here -->
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
