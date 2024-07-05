@@ -143,6 +143,35 @@ function mergeDictionaries(existing, newEntries) {
       });
   
       return true;
+    } else if (request.action === "updateKeywords") {
+    chrome.storage.local.get('dictionaryList', function(result) {
+      const dictionaryList = result.dictionaryList || [];
+      
+      const updatedList = dictionaryList.map(dict => {
+        if (dict.name === request.name) {
+          dict.keywords = request.keywords;
+        }
+        return dict;
+      });
+
+      chrome.storage.local.set({ 
+        dictionaryList: updatedList 
+      }, function() {
+        sendResponse({ message: "Keywords updated successfully!" });
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+          chrome.tabs.sendMessage(tabs[0].id, {action: "dictionaryUpdated"});
+        });
+      });
+    });
+
+    return true;
+  }
+
+  });
+
+  chrome.webNavigation.onCompleted.addListener(details => {
+    if (details.frameId === 0) { // Only for main frame
+      chrome.tabs.sendMessage(details.tabId, { action: "pageLoaded" });
     }
   });
   

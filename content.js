@@ -1,18 +1,51 @@
-// content.js
-
 let dictionary = {};
 let dictionaryList = [];
+let debounceTimer;
+
+function debounce(func, delay) {
+  return function() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => func.apply(this, arguments), delay);
+  };
+}
 
 function getVisibleText() {
-  return document.body.innerText;
+  return document.body.innerText.slice(0, 10000); // Limit to first 10000 characters
+}
+
+// Boyer-Moore-like search algorithm
+function createBadCharTable(pattern) {
+  const table = {};
+  const patternLength = pattern.length;
+  for (let i = 0; i < patternLength - 1; i++) {
+    table[pattern[i].toLowerCase()] = patternLength - 1 - i;
+  }
+  return table;
+}
+
+function searchKeyword(text, keyword) {
+  const lowercaseText = text.toLowerCase();
+  const lowercaseKeyword = keyword.toLowerCase();
+  const badCharTable = createBadCharTable(lowercaseKeyword);
+  let i = lowercaseKeyword.length - 1;
+  
+  while (i < lowercaseText.length) {
+    let j = lowercaseKeyword.length - 1;
+    while (j >= 0 && lowercaseText[i] === lowercaseKeyword[j]) {
+      i--;
+      j--;
+    }
+    if (j < 0) return true;
+    i += Math.max(badCharTable[lowercaseText[i]] || lowercaseKeyword.length, lowercaseKeyword.length - j);
+  }
+  return false;
 }
 
 function searchKeywords(text, keywords) {
-  const lowerText = text.toLowerCase();
-  return keywords.some(keyword => lowerText.includes(keyword.toLowerCase()));
+  return keywords.some(keyword => searchKeyword(text, keyword));
 }
 
-function updateActiveDictionaries() {
+const updateActiveDictionaries = debounce(() => {
   const visibleText = getVisibleText();
   const activeDictionaries = dictionaryList.filter(dict => 
     dict.enabled && (!dict.keywords || dict.keywords.length === 0 || searchKeywords(visibleText, dict.keywords))
@@ -26,7 +59,7 @@ function updateActiveDictionaries() {
     console.log('Active dictionaries:', activeDictionaries);
     console.log('Dictionary updated:', Object.keys(dictionary).length, 'entries');
   });
-}
+}, 300); // 300ms debounce
 
 function loadDictionaryList() {
   chrome.storage.local.get('dictionaryList', result => {
@@ -311,19 +344,22 @@ function handleDoubleClick(event) {
     console.log('No matches found');
   }
 }
-// Initialize
-loadDictionaryList();
-document.addEventListener('dblclick', handleDoubleClick);
+function initializeExtension() {
+  loadDictionaryList();
+  document.addEventListener('dblclick', handleDoubleClick);
 
-// Update dictionaries when page content changes
-const observer = new MutationObserver(() => {
-  updateActiveDictionaries();
-});
-observer.observe(document.body, { childList: true, subtree: true });
+  const observer = new MutationObserver(updateActiveDictionaries);
+  observer.observe(document.body, { childList: true, subtree: true });
+}
 
-// Listen for dictionary updates from popup
+// Initialize on page load
+initializeExtension();
+
+// Reinitialize on navigation
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === "dictionaryUpdated") {
+  if (request.action === "pageLoaded") {
+    initializeExtension();
+  } else if (request.action === "dictionaryUpdated") {
     console.log('Dictionary list updated, reloading');
     loadDictionaryList();
   }
