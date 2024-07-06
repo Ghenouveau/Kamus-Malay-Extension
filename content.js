@@ -59,7 +59,7 @@ const updateActiveDictionaries = debounce(() => {
     console.log('Active dictionaries:', activeDictionaries);
     console.log('Dictionary updated:', Object.keys(dictionary).length, 'entries');
   });
-}, 300); // 300ms debounce
+}, 700); // 300ms debounce
 
 function loadDictionaryList() {
   chrome.storage.local.get('dictionaryList', result => {
@@ -349,7 +349,7 @@ function initializeExtension() {
   document.addEventListener('dblclick', handleDoubleClick);
 
   const observer = new MutationObserver(updateActiveDictionaries);
-  observer.observe(document.body, { childList: true, subtree: true });
+  observer.observe(document.body, { subtree: true, characterData: true, childList: true });
 }
 
 // Initialize on page load
