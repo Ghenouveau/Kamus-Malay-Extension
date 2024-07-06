@@ -6,30 +6,34 @@
 
 # Quick English to Malay Translation
 
-The Quick English to Malay Translation is a handy Chrome extension that provides instant English to Malay translations and meanings for words on any webpage. With a simple double-click on a word, the extension displays a popup containing the relevant information.
+A Chrome extension for instant English to Malay translations on any webpage.
 
 ## Features
 
-- The first one of its kind! Over 21000+ entries!!
-- Provides an accurate English to Malay translations, pronunciations, and meanings
-- Does not rely on Google or any ML translation as its source
-- Rely on author's own dictionary collections
-- Utilizes a stemming algorithm as a fallback for words not found in the dictionary
+- Instant translations with a double-click
+- Over 21,000 entries
+- Accurate English to Malay translations, pronunciations, and meanings
+- Uses a custom dictionary, not reliant on Google or ML translations
+- Fallback stemming algorithm for words not in the dictionary
 
 ## Installation
 
-- Clone or download the repository
-- Open Google Chrome and navigate to chrome://extensions
-- Enable "Developer mode" in the top right corner
-- Click on "Load unpacked" and select the directory containing the extension files
-- The Quick Translation Popup extension will be added to your browser
+1. Clone or download this repository
+2. Open Google Chrome and go to `chrome://extensions`
+3. Enable "Developer mode" in the top right corner
+4. Click "Load unpacked" and select the extension directory
+5. The extension will be added to your browser
 
 ## Usage
 
-- Double-click on any word on a webpage
-- The translation popup will appear near the selected word, displaying the English to Malay translation, pronunciation, and meaning
-- Click anywhere outside the popup to close it
+1. Double-click any word on a webpage
+2. A popup will appear with the translation, pronunciation, and meaning
+3. Click outside the popup to close it
 
 ## Contributing
 
-Contributions are welcome! If you have any ideas, suggestions, or bug reports, please open an issue or submit a pull request.
+Contributions are welcome. Please open an issue or submit a pull request for any bugs, features, or improvements.
+
+## Acknowledgements
+
+- Dictionary data are compiled by the author from various sources
