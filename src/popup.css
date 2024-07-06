@@ -51,3 +51,8 @@
   margin-top: 12px;
   margin-bottom: 6px;
 }
+
+.original-word {
+  font-size: 0.8em;
+  color: #666;
+}
