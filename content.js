@@ -90,6 +90,9 @@ function createPopup(entries, selectedWord, shouldHighlight, x, y) {
       let content = '';
       if (entry.dictionaryName && entry.dictionaryName !== 'default') {
         content += `<span class="dictionary-name" style="color: ${getColorForDictionary(entry.dictionaryName)};">${entry.dictionaryName}</span><br>`;
+        
+        // Always display the original word from the custom dictionary
+        content += `<span class="original-word">${entry.word}</span><br>`;
       }
 
       if (shouldHighlight) {
