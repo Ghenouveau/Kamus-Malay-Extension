@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Kamus Dictionary Management</title>
+  <!-- ... -->
+  <link rel="stylesheet" href="popup.css">
+  <!-- ... -->
+  <style>
+    body { width: 350px; padding: 10px; font-family: Arial, sans-serif; }
+    button { margin-top: 10px; }
+    #dictionaryList { margin-top: 20px; }
+    .dictionary-item { display: flex; flex-direction: column; margin-bottom: 15px; }
+    .dictionary-item button { margin-top: 5px; margin-right: 5px; }
+    .keywords-input { margin-top: 5px; width: 100%; }
+
+    #formatTips {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f8f8f8;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: #666;
+}
+
+#formatTips p {
+  margin: 0;
+  font-weight: bold;
+}
+
+#formatTips ul {
+  margin-top: 5px;
+  margin-bottom: 0;
+  padding-left: 20px;
+}
+
+#formatTips li {
+  margin-bottom: 3px;
+}
+  </style>
+</head>
+<body>
+  <h2>Kamus Dictionary Management</h2>
+  <input type="file" id="csvFile" accept=".csv">
+  <button id="loadDictionary">Load Dictionary</button>
+  <div></div>
+  <div id="status"></div>
+
+  <div id="formatTips">
+    <p>Custom dictionary format:</p>
+    <ul>
+      <li>Has two columns</li>
+      <li>Column 1: English word or the lookup word</li>
+      <li>Column 2: Malay translation or the definition</li>
+      <li>Must be a CSV File</li>
+    </ul>
+  </div>
+
+  <div id="dictionaryList">
+    <h3>Loaded Dictionaries</h3>
+    <!-- Dictionary items will be dynamically added here -->
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
