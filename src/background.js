@@ -26,16 +26,7 @@ function mergeDictionaries(existing, newEntries) {
   }
   
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    if (request.action === "getFilteredDictionary") {
-        chrome.storage.local.get('dictionaries', result => {
-          const dictionaries = result.dictionaries || {};
-          const mergedDictionary = Object.values(dictionaries).reduce(mergeDictionaries, {});
-          const filteredDictionary = filterDictionary(mergedDictionary, request.activeDictionaries);
-          sendResponse({ filteredDictionary: filteredDictionary });
-        });
-        return true; // Indicates that the response will be sent asynchronously
-      }
-    else if (request.action === "loadDictionary") {
+    if (request.action === "loadDictionary") {
       const csvContent = request.data;
       const dictionaryName = request.name;
       const rows = csvContent.trim().split('\n');
@@ -143,35 +134,6 @@ function mergeDictionaries(existing, newEntries) {
       });
   
       return true;
-    } else if (request.action === "updateKeywords") {
-    chrome.storage.local.get('dictionaryList', function(result) {
-      const dictionaryList = result.dictionaryList || [];
-      
-      const updatedList = dictionaryList.map(dict => {
-        if (dict.name === request.name) {
-          dict.keywords = request.keywords;
-        }
-        return dict;
-      });
-
-      chrome.storage.local.set({ 
-        dictionaryList: updatedList 
-      }, function() {
-        sendResponse({ message: "Keywords updated successfully!" });
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-          chrome.tabs.sendMessage(tabs[0].id, {action: "dictionaryUpdated"});
-        });
-      });
-    });
-
-    return true;
-  }
-
-  });
-
-  chrome.webNavigation.onCompleted.addListener(details => {
-    if (details.frameId === 0) { // Only for main frame
-      chrome.tabs.sendMessage(details.tabId, { action: "pageLoaded" });
     }
   });
   

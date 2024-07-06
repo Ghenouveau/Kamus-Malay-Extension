@@ -1,70 +1,19 @@
+// content.js
+
 let dictionary = {};
-let dictionaryList = [];
-let debounceTimer;
 
-function debounce(func, delay) {
-  return function() {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => func.apply(this, arguments), delay);
-  };
-}
-
-function getVisibleText() {
-  return document.body.innerText.slice(0, 10000); // Limit to first 10000 characters
-}
-
-// Boyer-Moore-like search algorithm
-function createBadCharTable(pattern) {
-  const table = {};
-  const patternLength = pattern.length;
-  for (let i = 0; i < patternLength - 1; i++) {
-    table[pattern[i].toLowerCase()] = patternLength - 1 - i;
-  }
-  return table;
-}
-
-function searchKeyword(text, keyword) {
-  const lowercaseText = text.toLowerCase();
-  const lowercaseKeyword = keyword.toLowerCase();
-  const badCharTable = createBadCharTable(lowercaseKeyword);
-  let i = lowercaseKeyword.length - 1;
-  
-  while (i < lowercaseText.length) {
-    let j = lowercaseKeyword.length - 1;
-    while (j >= 0 && lowercaseText[i] === lowercaseKeyword[j]) {
-      i--;
-      j--;
-    }
-    if (j < 0) return true;
-    i += Math.max(badCharTable[lowercaseText[i]] || lowercaseKeyword.length, lowercaseKeyword.length - j);
-  }
-  return false;
-}
-
-function searchKeywords(text, keywords) {
-  return keywords.some(keyword => searchKeyword(text, keyword));
-}
-
-const updateActiveDictionaries = debounce(() => {
-  const visibleText = getVisibleText();
-  const activeDictionaries = dictionaryList.filter(dict => 
-    dict.enabled && (!dict.keywords || dict.keywords.length === 0 || searchKeywords(visibleText, dict.keywords))
-  ).map(dict => dict.name);
-
-  chrome.runtime.sendMessage({
-    action: "getFilteredDictionary",
-    activeDictionaries: activeDictionaries
-  }, response => {
-    dictionary = response.filteredDictionary;
-    console.log('Active dictionaries:', activeDictionaries);
-    console.log('Dictionary updated:', Object.keys(dictionary).length, 'entries');
-  });
-}, 700); // 300ms debounce
-
-function loadDictionaryList() {
-  chrome.storage.local.get('dictionaryList', result => {
-    dictionaryList = result.dictionaryList || [];
-    updateActiveDictionaries();
+async function loadDictionary() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get('dictionary', function(result) {
+      if (result.dictionary && Object.keys(result.dictionary).length > 0) {
+        dictionary = result.dictionary;
+        console.log('Dictionary loaded:', Object.keys(dictionary).length, 'entries');
+        resolve();
+      } else {
+        console.log('No dictionary found, waiting for background script to initialize');
+        resolve();
+      }
+    });
   });
 }
 
@@ -90,9 +39,6 @@ function createPopup(entries, selectedWord, shouldHighlight, x, y) {
       let content = '';
       if (entry.dictionaryName && entry.dictionaryName !== 'default') {
         content += `<span class="dictionary-name" style="color: ${getColorForDictionary(entry.dictionaryName)};">${entry.dictionaryName}</span><br>`;
-        
-        // Always display the original word from the custom dictionary
-        content += `<span class="original-word">${entry.word}</span><br>`;
       }
 
       if (shouldHighlight) {
@@ -320,6 +266,12 @@ function findPartialMatches(normalizedText) {
   return [];
 }
 
+
+loadDictionary().then(() => {
+  console.log('Dictionary loaded, adding event listener');
+  document.addEventListener('dblclick', handleDoubleClick);
+});
+
 function handleDoubleClick(event) {
   const selection = window.getSelection();
   const selectedText = selection.toString().trim();
@@ -347,23 +299,10 @@ function handleDoubleClick(event) {
     console.log('No matches found');
   }
 }
-function initializeExtension() {
-  loadDictionaryList();
-  document.addEventListener('dblclick', handleDoubleClick);
 
-  const observer = new MutationObserver(updateActiveDictionaries);
-  observer.observe(document.body, { subtree: true, characterData: true, childList: true });
-}
-
-// Initialize on page load
-initializeExtension();
-
-// Reinitialize on navigation
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === "pageLoaded") {
-    initializeExtension();
-  } else if (request.action === "dictionaryUpdated") {
-    console.log('Dictionary list updated, reloading');
-    loadDictionaryList();
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  if (request.action === "dictionaryUpdated") {
+    console.log('Dictionary update received, reloading');
+    loadDictionary();
   }
 });
