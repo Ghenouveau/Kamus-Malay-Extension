@@ -3,9 +3,9 @@
   position: absolute !important;
   background: rgba(255, 255, 255, 0.9) !important;
   backdrop-filter: blur(10px) !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid rgba(200, 200, 200, 0.3) !important;
   border-radius: 8px !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
   padding: 16px !important;
   font-size: 14px !important;
   max-width: 300px !important;
@@ -25,22 +25,34 @@
   margin-bottom: 12px !important;
 }
 
+.kamus-translation-popup .dictionary-name {
+  font-weight: bold;
+  font-style: italic;
+  font-size: 0.9em;
+  margin-bottom: 2px;
+}
+
 .kamus-translation-popup .meaning {
   margin-bottom: 6px !important;
 }
 
 .kamus-translation-popup .highlight {
-  color: darkred !important;
+  color: #bb1221 !important;
   font-weight: bold !important;
 }
 
 .kamus-translation-popup .separator {
-  border-top: 1px solid #ccc;
-  margin: 12px 0;
+  border-top: 1px solid #ddd !important;
+  margin: 10px 0 !important;
 }
 
 .kamus-translation-popup .word-title {
   font-weight: bold;
   margin-top: 12px;
   margin-bottom: 6px;
+}
+
+.original-word {
+  font-size: 0.8em;
+  color: #666;
 }
